@@ -27,42 +27,34 @@ class User {
         return this.pets.length;
     }
 
-    //addBook
-    addBook(book) {
-        this.books.push(book);
+    //addBook with author
+    addBook(book, author) {
+        this.books.push({
+            title: book,
+            author: author
+        });
     }
 
     //getBookNames
     getBookNames() {
-        return this.books.join(', ');
+        return this.books.map(book => book.title);
     }
 }
 
 //create new user
-const newUser = new User('Juan', 'Perez', ['The Lord of the Rings', 'The Hobbit', 'The Silmarillion'], 
-    [
-        {
-            name: 'Fido',
-            type: 'dog'
-        },
-        {
-            name: 'Bella',
-            type: 'cat'
-        }
-    ]
-);
+const user = new User('Juan', 'Perez', [], []);
 
-console.log(newUser.getFullName());
-console.log(newUser.countPets());
-console.log(newUser.getBookNames());
-console.log(newUser.getPetNames());
-newUser.addPet({
-    name: 'Lucky',
+//add pet to user
+user.addPet({
+    name: 'Fido',
     type: 'dog'
 });
-console.log(newUser.getPetNames());
-console.log(newUser.countPets());
-newUser.addBook('The Lord of the Rings');
-console.log(newUser.getBookNames());
-newUser.addBook('The Hobbit');
-console.log(newUser.getBookNames());
+
+//add book to user
+user.addBook('Harry Potter', 'J.K. Rowling');
+
+console.log(user.getFullName());
+console.log(user.getPetNames());
+console.log(user.countPets());
+console.log(user.getBookNames());
+
