@@ -6,72 +6,136 @@ getById(Number): Object - Recibe un id y devuelve el objeto con ese id, o null s
 getAll(): Object[] - Devuelve un array con los objetos presentes en el archivo.
 deleteById(Number): void - Elimina del archivo el objeto con el id buscado.
 deleteAll(): void - Elimina todos los objetos presentes en el archivo.
+
+El método save incorporará al producto un id numérico, que deberá ser siempre uno más que el id del último objeto agregado (o id 1 si es el primer objeto que se agrega) y no puede estar repetido.
+Tomar en consideración el contenido previo del archivo, en caso de utilizar uno existente.
+Implementar el manejo de archivos con el módulo fs de node.js, utilizando promesas con async/await y manejo de errores.
+Probar el módulo creando un contenedor de productos, que se guarde en el archivo: “productos.txt”
+Incluir un llamado de prueba a cada método, y mostrando por pantalla según corresponda para verificar el correcto funcionamiento del módulo construído. 
+
 */
 const fs = require('fs');
 
 class Contenedor {
     constructor(nombreArchivo) {
         try{
-            fs.accessSync(nombreArchivo);
-        }catch(e){
-            fs.writeFileSync(nombreArchivo, '');
+            this.nombreArchivo = nombreArchivo;
+            this.productos = JSON.parse(fs.readFileSync(nombreArchivo, 'utf8'));
+        }catch(error){
+            fs.writeFileSync(nombreArchivo, JSON.stringify([]));
+            this.productos = [];
         }
-        this.nombreArchivo = nombreArchivo;
     }
-    save(objeto) {
-        //generate id with random number if no exist in nombreArchivo add id to objeto
-        let archivo = this.getAll();
-        let id = 0;
-        if (archivo.length > 0) {
-            while(archivo.find(obj => obj.id == objeto.id)){
-                objeto.id = Math.floor(Math.random() * 100);
-                id = objeto.id;
-                if(archivo.length >= 100){
-                    return -1;
-                }
+
+    save(producto) {
+        return new Promise((resolve, reject) => {
+            try {
+                let id = this.productos.length>0 ? this.productos[this.productos.length-1].id + 1 : 0;
+                producto.id = id;
+                this.productos.push(producto);
+                fs.writeFileSync(this.nombreArchivo, JSON.stringify(this.productos));
+                resolve(id);
+            } catch (error) {
+                reject(error);
             }
-        }else{
-            id = Math.floor(Math.random() * 100);
-            objeto.id = id;
-        }
-        archivo.push(objeto);
-        this.deleteAll();
-        this.saveAll(archivo);
-        return id;
+        }).then(id => {
+            return id;
+        }).catch(error => {
+            return error;
+        });
     }
+
     getById(id) {
-        let archivo = this.getAll();
-        let objeto = archivo.find(obj => obj.id == id);
-        return objeto;
+        return new Promise((resolve, reject) => {
+            try {
+                let producto = this.productos.find(producto => producto.id == id);
+                resolve(producto);
+            } catch (error) {
+                reject(error);
+            }
+        }).then(producto => {
+            return producto;
+        }).catch(error => {
+            return error;
+        });
     }
+
     getAll() {
-        let archivo = fs.readFileSync(this.nombreArchivo, 'utf8');
-        if (archivo == '') {
-            return [];
-        } else {
-            return JSON.parse(archivo);
-        }
+        return new Promise((resolve, reject) => {
+            try {
+                resolve(this.productos);
+            } catch (error) {
+                reject(error);
+            }
+        }).then(productos => {
+            return productos;
+        }).catch(error => {
+            return error;
+        });
     }
+
     deleteById(id) {
-        let archivo = this.getAll();
-        let objeto = archivo.find(obj => obj.id == id);
-        archivo.splice(archivo.indexOf(objeto), 1);
-        this.deleteAll();
-        this.saveAll(archivo);
+        return new Promise((resolve, reject) => {
+            try {
+                let producto = this.productos.find(producto => producto.id == id);
+                this.productos.splice(this.productos.indexOf(producto), 1);
+                fs.writeFileSync(this.nombreArchivo, JSON.stringify(this.productos));
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        }).then(() => {
+            return;
+        }).catch(error => {
+            return error;
+        });
     }
+
     deleteAll() {
-        fs.writeFileSync(this.nombreArchivo, '');
-    }
-    saveAll(archivo) {
-        fs.writeFileSync(this.nombreArchivo, JSON.stringify(archivo));
+        return new Promise((resolve, reject) => {
+            try {
+                this.productos = [];
+                fs.writeFileSync(this.nombreArchivo, JSON.stringify(this.productos));
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        }).then(() => {
+            return;
+        }).catch(error => {
+            return error;
+        });
     }
 }
 
-const contenedor = new Contenedor('archivo.json');
-console.log(contenedor.save({nombre: 'Fred', edad: 27}));
-console.log(contenedor.getById(26));
-console.log(contenedor.getAll());
-contenedor.deleteById(62);
-console.log(contenedor.getAll());
+const printConsole = async (productos) => {
+    console.log(await productos);
+}
+
+const contenedor = new Contenedor('productos.txt');
+
+contenedor.save({                                                                                                                                                    
+      title: 'Escuadra',                                                                                                                                 
+      price: 123.45,                                                                                                                                     
+      thumbnail: 'https://cdn3.iconfinder.com/data/icons/education-209/64/ruler-triangle-stationary-school-256.png',                                          
+});
+contenedor.save({                                                                                                                                                    
+    title: 'Calculadora',                                                                                                                              
+    price: 234.56,                                                                                                                                     
+    thumbnail: 'https://cdn3.iconfinder.com/data/icons/education-209/64/calculator-math-tool-school-256.png',                                                                                                                                                                                        
+});
+contenedor.save({                                                                                                                                                    
+    title: 'Globo Terráqueo',                                                                                                                          
+    price: 345.67,                                                                                                                                     
+    thumbnail: 'https://cdn3.iconfinder.com/data/icons/education-209/64/globe-earth-geograhy-planet-school-256.png',                                    
+});
+
+printConsole(contenedor.getById(1));
+printConsole(contenedor.getById(2));
+printConsole(contenedor.getAll());
+
+contenedor.deleteById(1);
+printConsole(contenedor.getAll());
+
 contenedor.deleteAll();
-console.log(contenedor.getAll());
+printConsole(contenedor.getAll());
