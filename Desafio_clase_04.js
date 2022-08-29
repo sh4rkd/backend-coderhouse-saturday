@@ -157,7 +157,7 @@ class Contenedor {
         let id = this.productos.length>0 ? this.productos[this.productos.length-1].id + 1 : 0;
         producto.id = id;
         this.productos.push(producto);
-        fs.writeFile(this.nombreArchivo, JSON.stringify(this.productos));
+        fs.writeFileSync(this.nombreArchivo, JSON.stringify(this.productos));
         return id;
     }
 
@@ -172,18 +172,18 @@ class Contenedor {
     deleteById(id) {
         let producto = this.productos.find(producto => producto.id == id);
         this.productos.splice(this.productos.indexOf(producto), 1);
-        fs.writeFile(this.nombreArchivo, JSON.stringify(this.productos));
+        fs.writeFileSync(this.nombreArchivo, JSON.stringify(this.productos));
     }
 
     deleteAll() {
         this.productos = [];
-        fs.writeFile(this.nombreArchivo, JSON.stringify(this.productos));
+        fs.writeFileSync(this.nombreArchivo, JSON.stringify(this.productos));
     }
 
     update(producto) {
         let index = this.productos.findIndex(p => p.id == producto.id);
         this.productos[index] = producto;
-        fs.writeFile(this.nombreArchivo, JSON.stringify(this.productos));
+        fs.writeFileSync(this.nombreArchivo, JSON.stringify(this.productos));
     }
 }
 
