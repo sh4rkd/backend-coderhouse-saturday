@@ -146,9 +146,10 @@ class Contenedor {
     constructor(nombreArchivo) {
         try{
             this.nombreArchivo = nombreArchivo;
+            //readfile without sync
             this.productos = JSON.parse(fs.readFileSync(nombreArchivo, 'utf8'));
         }catch(error){
-            fs.writeFile(nombreArchivo, JSON.stringify([]));
+            fs.writeFileSync(nombreArchivo, JSON.stringify([]));
             this.productos = [];
         }
     }
